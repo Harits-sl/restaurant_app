@@ -1,22 +1,35 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:restaurant_app/common/styles.dart';
-import 'package:restaurant_app/model/restaurant_model.dart';
-import 'package:restaurant_app/ui/detail_page.dart';
+import 'package:provider/provider.dart';
+import '../data/model/restaurants.dart';
+import '../common/api_endpoint.dart';
+import '../common/styles.dart';
+
+import '../provider/detail_restaurant_provider.dart';
+import '../ui/detail_page.dart';
 
 class CustomCardRestaurant extends StatelessWidget {
   const CustomCardRestaurant({Key? key, required this.restaurant})
       : super(key: key);
 
-  final RestaurantModel restaurant;
+  /// [Restaurants] from ListRestaurantModel
+  final Restaurants restaurant;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, DetailPage.routeName,
-            arguments: restaurant);
+        DetailRestaurantProvider detailRestaurantProvider =
+            Provider.of<DetailRestaurantProvider>(context, listen: false);
+
+        detailRestaurantProvider.setId = restaurant.id;
+
+        Navigator.pushNamed(
+          context,
+          DetailPage.routeName,
+          arguments: restaurant,
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -33,14 +46,11 @@ class CustomCardRestaurant extends StatelessWidget {
                     topLeft: Radius.circular(12),
                     topRight: Radius.circular(12),
                   ),
-                  child: Hero(
-                    tag: restaurant.id,
-                    child: Image.network(
-                      restaurant.pictureId,
-                      width: 180,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
+                  child: Image.network(
+                    '${ApiEndpoint.mediumImageResolution}/${restaurant.pictureId}',
+                    width: 180,
+                    height: 200,
+                    fit: BoxFit.cover,
                   ),
                 ),
                 Container(

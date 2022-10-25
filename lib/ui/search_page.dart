@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:restaurant_app/common/styles.dart';
-import 'package:restaurant_app/model/restaurant_model.dart';
-import 'package:restaurant_app/services/restaurant_service.dart';
-import 'package:restaurant_app/widgets/custom_list_tile_restaurant.dart';
+import 'package:provider/provider.dart';
+import '../data/model/restaurants.dart';
+import '../provider/search_restaurant_provider.dart';
+import '../common/styles.dart';
+import '../widgets/custom_list_tile_restaurant.dart';
 
 class SearchPage extends StatefulWidget {
   static const String routeName = '/search';
@@ -14,128 +17,157 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final TextEditingController _searchController = TextEditingController();
-  List<RestaurantModel> restaurants = [];
-  List<RestaurantModel> searchResults = [];
+  TextEditingController _searchController = TextEditingController();
+  List<Restaurants> _searchResults = [];
 
-  void _searchRestaurant(String query) {
-    List<RestaurantModel> list = [];
+  final List<String> _listHintSearch = [
+    'Kafe',
+    'Italia',
+    'kopi',
+    'Air',
+    'Sop',
+    'Jus',
+    'Es',
+    'Soda',
+    'Modern',
+    'Apel',
+  ];
+  late String _hintSearch =
+      _listHintSearch[Random().nextInt(_listHintSearch.length)];
 
-    for (var restaurant in restaurants) {
-      if (restaurant.name.toLowerCase().contains(query.toLowerCase())) {
-        list.add(restaurant);
-      }
-    }
-    setState(() {
-      searchResults = list;
-    });
+  late SearchRestaurantProvider searchRestaurantProvider;
+
+  @override
+  void initState() {
+    super.initState();
+
+    searchRestaurantProvider =
+        Provider.of<SearchRestaurantProvider>(context, listen: false);
   }
 
-  void _clearResult() {
-    setState(() {
-      searchResults.clear();
-      searchResults = [];
-    });
+  @override
+  void dispose() {
+    _searchResults = [];
+    _hintSearch = '';
+    searchRestaurantProvider.disposeValue();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget _buildSearch() {
-      return Container(
-        margin: const EdgeInsets.all(defaultMargin),
-        child: TextField(
-          autofocus: true,
-          style: Theme.of(context).textTheme.bodyMedium,
-          controller: _searchController,
-          onChanged: (String query) {
-            _searchRestaurant(query);
+    return Scaffold(
+      body: _buildBody(),
+    );
+  }
 
-            if (_searchController.text == '') {
-              _clearResult();
-            }
-          },
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: whiteColor,
-            hintText: 'Search Restaurant...',
-            hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: greyColor,
-                ),
-            prefixIcon: const Padding(
-              padding: EdgeInsets.all(11),
-              child: Icon(
-                Icons.search_rounded,
-                color: primaryColor,
-                size: 34,
+  SafeArea _buildBody() {
+    return SafeArea(
+      child: Consumer<SearchRestaurantProvider>(
+          builder: (BuildContext context, state, _) {
+        _searchResults = state.searchRestaurant == null
+            ? []
+            : state.searchRestaurant!.restaurants;
+
+        return ListView(
+          children: [
+            _buildSearch(),
+            _buildTitleResult(),
+            _buildResult(state),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildSearch() {
+    return Container(
+      margin: const EdgeInsets.all(defaultMargin),
+      child: TextField(
+        autofocus: true,
+        style: Theme.of(context).textTheme.bodyMedium,
+        controller: _searchController,
+        onSubmitted: (String query) {
+          _searchResults.clear();
+
+          if (query == '') {
+            _searchController = TextEditingController(text: _hintSearch);
+          }
+
+          searchRestaurantProvider
+              .fetchSearchRestaurant(_searchController.text);
+        },
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: whiteColor,
+          hintText: _hintSearch,
+          hintStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                color: greyColor,
               ),
-            ),
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(50),
+          prefixIcon: const Padding(
+            padding: EdgeInsets.all(11),
+            child: Icon(
+              Icons.search_rounded,
+              color: primaryColor,
+              size: 34,
             ),
           ),
-        ),
-      );
-    }
-
-    Widget _buildTitleResult() {
-      return Padding(
-        padding: const EdgeInsets.only(left: defaultMargin),
-        child: Text(
-          'Result (${searchResults.length})',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-      );
-    }
-
-    Widget _buildResult() {
-      int index = 0;
-      return Column(
-        children: searchResults.map(
-          (restaurant) {
-            index++;
-            return Container(
-              margin: EdgeInsets.only(
-                top: index == 1 ? 8 : 12,
-                bottom: index == searchResults.length ? defaultMargin : 0,
-                left: defaultMargin,
-                right: defaultMargin,
-              ),
-              child: CustomListTileRestaurant(
-                restaurant: restaurant,
-              ),
-            );
-          },
-        ).toList(),
-      );
-    }
-
-    return Scaffold(
-      body: SafeArea(
-        child: FutureBuilder(
-          future: RestaurantService.loadData(),
-          builder: ((context, AsyncSnapshot<List<RestaurantModel>> snapshot) {
-            if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            }
-
-            if (snapshot.hasData) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                restaurants = snapshot.data!;
-              });
-
-              return ListView(
-                children: [
-                  _buildSearch(),
-                  _buildTitleResult(),
-                  _buildResult(),
-                ],
-              );
-            }
-            return const SizedBox();
-          }),
+          border: OutlineInputBorder(
+            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(50),
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildTitleResult() {
+    return Padding(
+      padding: const EdgeInsets.only(left: defaultMargin),
+      child: Text(
+        _searchResults.isEmpty
+            ? 'Result (0)'
+            : 'Result (${_searchResults.length})',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+    );
+  }
+
+  Widget _buildResult(SearchRestaurantProvider state) {
+    int index = 0;
+    return state.state == ResultState.loading
+        ? SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height / 2,
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          )
+        : _searchResults.isEmpty
+            ? SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height / 2,
+                child: Center(
+                  child: Text(state.message),
+                ),
+              )
+            : Column(
+                children: _searchResults.map(
+                  (restaurant) {
+                    index++;
+                    return Container(
+                      margin: EdgeInsets.only(
+                        top: index == 1 ? 8 : 12,
+                        bottom:
+                            index == _searchResults.length ? defaultMargin : 0,
+                        left: defaultMargin,
+                        right: defaultMargin,
+                      ),
+                      child: CustomListTileRestaurant(
+                        restaurant: restaurant,
+                      ),
+                    );
+                  },
+                ).toList(),
+              );
   }
 }

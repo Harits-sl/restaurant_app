@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_app/common/styles.dart';
-import 'package:restaurant_app/model/restaurant_model.dart';
-import 'package:restaurant_app/ui/detail_page.dart';
+import 'package:provider/provider.dart';
+import '../data/model/restaurants.dart';
+import '../common/api_endpoint.dart';
+import '../common/styles.dart';
+
+import '../provider/detail_restaurant_provider.dart';
+import '../ui/detail_page.dart';
 
 class CustomListTileRestaurant extends StatelessWidget {
   const CustomListTileRestaurant({Key? key, required this.restaurant})
       : super(key: key);
 
-  final RestaurantModel restaurant;
+  final Restaurants restaurant;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        DetailRestaurantProvider detailRestaurantProvider =
+            Provider.of<DetailRestaurantProvider>(context, listen: false);
+
+        detailRestaurantProvider.setId = restaurant.id;
+
         Navigator.pushNamed(
           context,
           DetailPage.routeName,
@@ -31,14 +40,11 @@ class CustomListTileRestaurant extends StatelessWidget {
                 topLeft: Radius.circular(12),
                 bottomLeft: Radius.circular(12),
               ),
-              child: Hero(
-                tag: restaurant.id,
-                child: Image.network(
-                  restaurant.pictureId,
-                  width: 75,
-                  height: 75,
-                  fit: BoxFit.cover,
-                ),
+              child: Image.network(
+                '${ApiEndpoint.smallImageResolution}/${restaurant.pictureId}',
+                width: 75,
+                height: 75,
+                fit: BoxFit.cover,
               ),
             ),
             const SizedBox(

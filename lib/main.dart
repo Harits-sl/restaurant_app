@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_app/common/styles.dart';
-import 'package:restaurant_app/model/restaurant_model.dart';
-import 'package:restaurant_app/ui/detail_page.dart';
-import 'package:restaurant_app/ui/home_page.dart';
-import 'package:restaurant_app/ui/search_page.dart';
-import 'package:restaurant_app/ui/splash_page.dart';
+import 'package:provider/provider.dart';
+import 'provider/detail_restaurant_provider.dart';
+import 'provider/list_restaurant_provider.dart';
+import 'provider/review_restaurant_provider.dart';
+import 'provider/search_restaurant_provider.dart';
+import 'common/styles.dart';
+import 'ui/detail_page.dart';
+import 'ui/home_page.dart';
+import 'ui/search_page.dart';
+import 'ui/splash_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,21 +19,35 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        textTheme: customTextTheme,
-        scaffoldBackgroundColor: backgroundColor,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ListRestaurantProvider>(
+          create: (context) => ListRestaurantProvider(),
+        ),
+        ChangeNotifierProvider<DetailRestaurantProvider>(
+          create: (context) => DetailRestaurantProvider(),
+        ),
+        ChangeNotifierProvider<SearchRestaurantProvider>(
+          create: (context) => SearchRestaurantProvider(),
+        ),
+        ChangeNotifierProvider<ReviewRestaurantProvider>(
+          create: (context) => ReviewRestaurantProvider(),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          textTheme: customTextTheme,
+          scaffoldBackgroundColor: backgroundColor,
+        ),
+        initialRoute: SplashPage.routeName,
+        routes: {
+          SplashPage.routeName: (context) => const SplashPage(),
+          HomePage.routeName: (context) => const HomePage(),
+          SearchPage.routeName: (context) => const SearchPage(),
+          DetailPage.routeName: (context) => const DetailPage(),
+        },
       ),
-      initialRoute: SplashPage.routeName,
-      routes: {
-        SplashPage.routeName: (context) => const SplashPage(),
-        HomePage.routeName: (context) => const HomePage(),
-        SearchPage.routeName: (context) => const SearchPage(),
-        DetailPage.routeName: (context) => DetailPage(
-            restaurant:
-                ModalRoute.of(context)?.settings.arguments as RestaurantModel),
-      },
     );
   }
 }
