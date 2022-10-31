@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:restaurant_app/common/navigation.dart';
 import '../data/model/list_restaurant_model.dart';
 import '../provider/list_restaurant_provider.dart';
 import '../common/styles.dart';
@@ -8,8 +9,6 @@ import '../widgets/custom_card_restaurant.dart';
 import '../widgets/custom_list_tile_restaurant.dart';
 
 class HomePage extends StatelessWidget {
-  static const String routeName = '/home';
-
   const HomePage({Key? key}) : super(key: key);
 
   @override
@@ -24,7 +23,7 @@ class HomePage extends StatelessWidget {
   }
 
   void _onTapSearch(BuildContext context) {
-    Navigator.pushNamed(context, SearchPage.routeName);
+    Navigation.intent(SearchPage.routeName);
   }
 
   Widget _buildBody(BuildContext context) {
@@ -152,6 +151,9 @@ class HomePage extends StatelessWidget {
             return Container(
               margin: EdgeInsets.only(
                 top: index == 1 ? 0 : 12,
+                bottom: index == restaurants.restaurants.sublist(4).length
+                    ? defaultMargin + 35 // size icon bottom navbar
+                    : 0,
               ),
               child: CustomListTileRestaurant(
                 restaurant: restaurant,

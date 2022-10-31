@@ -5,15 +5,16 @@ import '../../common/api_endpoint.dart';
 import '../model/list_restaurant_model.dart';
 
 class ListRestaurantApi {
-  static Future<ListRestaurantModel?> getListRestaurant() async {
-    var apiResult = await http.get(Uri.parse('${ApiEndpoint.baseUrl}/list'));
+  static Future<ListRestaurantModel?> getListRestaurant(
+      http.Client client) async {
+    var apiResult = await client.get(Uri.parse('${ApiEndpoint.baseUrl}/list'));
 
     if (apiResult.statusCode == 200) {
       var data = jsonDecode(apiResult.body);
       ListRestaurantModel restaurant = ListRestaurantModel.fromJson(data);
       return restaurant;
     } else {
-      throw Exception('No Internet Connection');
+      throw Exception('Failed to load list restaurant');
     }
   }
 }

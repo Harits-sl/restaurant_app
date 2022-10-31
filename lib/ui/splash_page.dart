@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'home_page.dart';
+import 'package:restaurant_app/common/navigation.dart';
+import 'package:restaurant_app/ui/main_page.dart';
 
 class SplashPage extends StatelessWidget {
   static const String routeName = '/splash-page';
@@ -12,10 +13,8 @@ class SplashPage extends StatelessWidget {
   Widget build(BuildContext context) {
     Timer(
       const Duration(seconds: 3),
-      () => Navigator.pushNamedAndRemoveUntil(
-        context,
-        HomePage.routeName,
-        (route) => false,
+      () => Navigation.intentReplacement(
+        MainPage.routeName,
       ),
     );
 

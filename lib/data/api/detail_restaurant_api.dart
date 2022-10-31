@@ -5,9 +5,10 @@ import '../../common/api_endpoint.dart';
 import '../model/detail_restaurant_model.dart';
 
 class DetailRestaurantApi {
-  static Future<DetailRestaurantModel?> getDetail(String id) async {
+  static Future<DetailRestaurantModel?> getDetail(
+      String id, http.Client client) async {
     var apiResult =
-        await http.get(Uri.parse('${ApiEndpoint.baseUrl}/detail/$id'));
+        await client.get(Uri.parse('${ApiEndpoint.baseUrl}/detail/$id'));
 
     if (apiResult.statusCode == 200) {
       var data = jsonDecode(apiResult.body);

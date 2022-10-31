@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/api/list_restaurant_api.dart';
 import '../data/model/list_restaurant_model.dart';
+import 'package:http/http.dart' as http;
 
 enum ResultState { loading, noData, hasData, error }
 
@@ -17,7 +18,7 @@ class ListRestaurantProvider with ChangeNotifier {
     try {
       _state = ResultState.loading;
       final ListRestaurantModel? restaurant =
-          await ListRestaurantApi.getListRestaurant();
+          await ListRestaurantApi.getListRestaurant(http.Client());
 
       if (restaurant == null) {
         _message = 'Failed to load data';

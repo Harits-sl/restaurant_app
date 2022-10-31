@@ -15,6 +15,16 @@ class DetailRestaurantModel {
       restaurant: Restaurant.fromMap(map['restaurant']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    final result = <String, dynamic>{};
+
+    result.addAll({'error': error});
+    result.addAll({'message': message});
+    result.addAll({'restaurant': restaurant.toJson()});
+
+    return result;
+  }
 }
 
 class Restaurant {
@@ -57,6 +67,24 @@ class Restaurant {
           map['customerReviews']?.map((x) => CustomerReviews.fromMap(x))),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    final result = <String, dynamic>{};
+
+    result.addAll({'id': id});
+    result.addAll({'name': name});
+    result.addAll({'description': description});
+    result.addAll({'city': city});
+    result.addAll({'address': address});
+    result.addAll({'pictureId': pictureId});
+    result.addAll({'categories': categories.map((x) => x.toJson()).toList()});
+    result.addAll({'menus': menus.toJson()});
+    result.addAll({'rating': rating});
+    result.addAll(
+        {'customerReviews': customerReviews.map((x) => x.toJson()).toList()});
+
+    return result;
+  }
 }
 
 class Categories {
@@ -69,6 +97,14 @@ class Categories {
     return Categories(
       name: map['name'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    final result = <String, dynamic>{};
+
+    result.addAll({'name': name});
+
+    return result;
   }
 }
 
@@ -86,6 +122,15 @@ class Menus {
       drinks: List<Drinks>.from(map['drinks']?.map((x) => Drinks.fromMap(x))),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    final result = <String, dynamic>{};
+
+    result.addAll({'foods': foods.map((x) => x.toJson()).toList()});
+    result.addAll({'drinks': drinks.map((x) => x.toJson()).toList()});
+
+    return result;
+  }
 }
 
 class Foods {
@@ -99,6 +144,14 @@ class Foods {
       name: map['name'] ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    final result = <String, dynamic>{};
+
+    result.addAll({'name': name});
+
+    return result;
+  }
 }
 
 class Drinks {
@@ -111,6 +164,14 @@ class Drinks {
     return Drinks(
       name: map['name'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    final result = <String, dynamic>{};
+
+    result.addAll({'name': name});
+
+    return result;
   }
 }
 
@@ -130,5 +191,15 @@ class CustomerReviews {
       review: map['review'] ?? '',
       date: map['date'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    final result = <String, dynamic>{};
+
+    result.addAll({'name': name});
+    result.addAll({'review': review});
+    result.addAll({'date': date});
+
+    return result;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../data/api/detail_restaurant_api.dart';
 
 import '../data/model/detail_restaurant_model.dart';
@@ -21,12 +22,12 @@ class DetailRestaurantProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void fetchDetailRestaurant() async {
+  void fetchDetailRestaurant(String? id) async {
     try {
       _state = ResultState.loading;
 
       final DetailRestaurantModel? restaurant =
-          await DetailRestaurantApi.getDetail(_id!);
+          await DetailRestaurantApi.getDetail(id ?? _id!, http.Client());
 
       if (restaurant == null) {
         _message = 'Failed to load detail';

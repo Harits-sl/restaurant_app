@@ -6,9 +6,9 @@ import '../model/search_restaurant_model.dart';
 
 class SearchRestaurantApi {
   static Future<SearchRestaurantModel?> getSearchRestaurant(
-      String query) async {
+      String query, http.Client client) async {
     var apiResult =
-        await http.get(Uri.parse('${ApiEndpoint.baseUrl}/search?q=$query'));
+        await client.get(Uri.parse('${ApiEndpoint.baseUrl}/search?q=$query'));
 
     if (apiResult.statusCode == 200) {
       var data = jsonDecode(apiResult.body);

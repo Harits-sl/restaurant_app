@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:restaurant_app/common/navigation.dart';
+import 'package:restaurant_app/provider/favorite_restaurant_provider.dart';
 import '../common/api_endpoint.dart';
 import '../data/model/detail_restaurant_model.dart';
 import '../provider/detail_restaurant_provider.dart';
@@ -8,8 +10,12 @@ import '../common/styles.dart';
 
 class DetailPage extends StatefulWidget {
   static const String routeName = '/detail-restaurant';
+  final String? idRestaurant;
 
-  const DetailPage({Key? key}) : super(key: key);
+  const DetailPage({
+    Key? key,
+    this.idRestaurant,
+  }) : super(key: key);
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -26,18 +32,32 @@ class _DetailPageState extends State<DetailPage>
   TextEditingController nameController = TextEditingController();
   TextEditingController reviewController = TextEditingController();
 
+  late DetailRestaurantProvider detailRestaurantProvider;
+  late FavoriteRestaurantProvider favoriteProvider;
+
   @override
   void initState() {
     super.initState();
-
     controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 300));
 
     offset = Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero)
         .animate(controller);
 
-    Provider.of<DetailRestaurantProvider>(context, listen: false)
-        .fetchDetailRestaurant();
+    detailRestaurantProvider =
+        Provider.of<DetailRestaurantProvider>(context, listen: false);
+    favoriteProvider =
+        Provider.of<FavoriteRestaurantProvider>(context, listen: false);
+
+    detailRestaurantProvider.fetchDetailRestaurant(widget.idRestaurant);
+    favoriteProvider.getDataFromSharedPreferences(
+        widget.idRestaurant ?? detailRestaurantProvider.id);
+  }
+
+  @override
+  void dispose() {
+    favoriteProvider.clearValue();
+    super.dispose();
   }
 
   @override
@@ -105,6 +125,7 @@ class _DetailPageState extends State<DetailPage>
           height: 270,
           fit: BoxFit.cover,
         ),
+        // NOTE: Button back
         SafeArea(
           child: Container(
             width: 40,
@@ -119,7 +140,7 @@ class _DetailPageState extends State<DetailPage>
             ),
             child: IconButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigation.back();
               },
               padding: EdgeInsets.zero,
               icon: const Icon(
@@ -130,6 +151,45 @@ class _DetailPageState extends State<DetailPage>
             ),
           ),
         ),
+        // NOTE: Button Favorite
+        Consumer<FavoriteRestaurantProvider>(
+            builder: (BuildContext context, state, _) {
+          return Align(
+            alignment: Alignment.topRight,
+            child: SafeArea(
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: whiteColor,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                margin: const EdgeInsets.only(
+                  right: defaultMargin,
+                  top: 12,
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    // isFavorite = state.isFavorite!;
+                    state.buttonFavoriteTapped(detailRestaurant);
+                    // state.setIsFavorite = !isFavorite;
+
+                    // SharedPreferencesHelper.writeBooleanData('a', true);
+                    // SharedPreferencesHelper.readBooleanData('a');
+                  },
+                  padding: EdgeInsets.zero,
+                  icon: Icon(
+                    state.isFavorite == false
+                        ? Icons.favorite_border
+                        : Icons.favorite,
+                  ),
+                  iconSize: 24,
+                  color: primaryColor,
+                ),
+              ),
+            ),
+          );
+        }),
       ],
     );
   }
@@ -476,7 +536,8 @@ class _DetailPageState extends State<DetailPage>
                   reviewController = TextEditingController(text: '');
 
                   /// fetch data restaurant from provider
-                  detailRestaurantProvider.fetchDetailRestaurant();
+                  detailRestaurantProvider
+                      .fetchDetailRestaurant(widget.idRestaurant);
                 });
                 showSnackBar();
               });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../data/api/search_restaurant_api.dart';
 import '../data/model/search_restaurant_model.dart';
 
@@ -19,7 +20,7 @@ class SearchRestaurantProvider with ChangeNotifier {
       notifyListeners();
 
       final SearchRestaurantModel? restaurant =
-          await SearchRestaurantApi.getSearchRestaurant(query);
+          await SearchRestaurantApi.getSearchRestaurant(query, http.Client());
 
       if (restaurant!.founded == 0) {
         _message = 'No result found';

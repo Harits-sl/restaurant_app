@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:restaurant_app/common/navigation.dart';
 import '../data/model/restaurants.dart';
 import '../common/api_endpoint.dart';
 import '../common/styles.dart';
@@ -22,10 +23,9 @@ class CustomListTileRestaurant extends StatelessWidget {
 
         detailRestaurantProvider.setId = restaurant.id;
 
-        Navigator.pushNamed(
-          context,
+        Navigation.intentWithData(
           DetailPage.routeName,
-          arguments: restaurant,
+          null,
         );
       },
       child: Container(
